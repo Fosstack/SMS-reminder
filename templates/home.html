@@ -9,6 +9,20 @@
     <link rel="stylesheet" href="static/app.css" />
 
 </head>
+
+{% macro render_field(field) %}
+  <dt>{{ field.label }}
+  <dd>{{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
 <body>
 
 <!-- The above form looks like this -->
@@ -19,16 +33,11 @@
   </div>
   <br>
 <form method="POST">
- <div class="row">
-    <div class="six columns">
-      <label for="phone">Phone</label>
-      <input class="u-full-width" required name="phone" type="text" placeholder="eg. +919876543210" id="phone">
-    </div>
-      <div class="six columns">
-      <label for="message">Message</label>
-      <input class="u-full-width" name="message" type="text" placeholder="specify the message" id="message">
-    </div>
-  </div>
+
+  <dl>
+    {{ render_field(form.phone) }}
+    {{ render_field(form.message) }}
+  </dl>
 
   <input class="button-primary" type="submit" value="Submit">
 </form>

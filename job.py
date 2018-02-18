@@ -1,6 +1,8 @@
+import humanize
 import pickle
 import requests
 import time
+from datetime import datetime
 
 from decouple import config
 from twilio.rest import Client
@@ -16,20 +18,23 @@ def send_message():
 
     def send():
         nonlocal tried
+        running_time = humanize.naturaldelta(datetime.now() - db['timestamp'])
+        body = f"{db['message']}\nservice running for {running_time}"
+
         try:
             message = client.messages.create(
                 to=db['phone'],
                 from_=config('TWILIO_PHONE'),
-                body=db['message'],
+                body=body,
                 status_callback=config('STATUS_CALLBACK'))
             sid = message.sid
             status = client.messages.get(sid).fetch().status
             time.sleep(20)
-            if status != 'delivered' and tried < 5:
+            if status not in ['sent', 'delivered'] and tried < 5:
                 tried += 1
-                with open('error.log', 'wa') as f:
+                with open('error.log', 'a+') as f:
                     f.write(f'{ time.ctime() } { status }\
-                         SMS did not send successfully\n')
+                    SMS did not send successfully\n')
                 send()
 
         except requests.exceptions.ConnectionError:

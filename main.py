@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+import atexit
 import pickle
 import time
 
@@ -5,7 +7,7 @@ from flask import Flask, request, redirect, render_template
 from forms import ReminderForm
 
 import humanize
-import schedule
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from job import send_message
 
@@ -24,8 +26,12 @@ def index():
                 'timestamp': time.time()
             }, f)
 
-            schedule.every(20).seconds.do(send_message)
-
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            send_message, 'interval', seconds=30, id="sms_job_id")
+        scheduler.start()
+        # Shut down the scheduler when exiting the app
+        atexit.register(lambda: scheduler.shutdown(wait=False))
         return redirect('/info')
     return render_template('home.html', form=form)
 
@@ -39,4 +45,4 @@ def info():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(use_reloader=False)

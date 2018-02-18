@@ -4,12 +4,13 @@ from twilio.rest import Client
 
 
 def send_message():
-    print('Job started!')
     account = config('TWILIO_ACCOUNT')
     token = config('TWILIO_TOKEN')
     client = Client(account, token)
     with open('db.bin', 'rb') as f:
         db = pickle.load(f)
+
+    print(db['message'])
     message = client.messages.create(
         to=db['phone'],
         from_=config('TWILIO_PHONE'),

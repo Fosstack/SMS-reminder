@@ -2,17 +2,15 @@
 
 import atexit
 import pickle
-import time
 from datetime import datetime
 from pytz import timezone
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, redirect, render_template
 from forms import ReminderForm
-
 import humanize
-from apscheduler.schedulers.background import BackgroundScheduler
 import phonenumbers
-
+from phonenumbers import timezone as ptz
 from job import send_message
 
 app = Flask(__name__)
@@ -26,12 +24,11 @@ def index():
         with open('db.bin', 'wb') as f:
             raw_phone_number = request.form['phone']
             phone_number = phonenumbers.parse(raw_phone_number)
-            time_zone = phonenumbers.timezone.get_timezones_for_phone(
-                phone_number)[0]
+            time_zone = ptz.time_zones_for_number(phone_number)[0]
             pickle.dump({
                 'phone': request.form['phone'],
                 'message': request.form['message'],
-                'timestamp': time.time(),
+                'timestamp': datetime.now(),
                 'time_zone': time_zone
             }, f)
 
@@ -41,8 +38,8 @@ def index():
         scheduler.add_job(
             send_message,
             'cron',
-            hour='7-23',
-            second=time_zone_time.seond,
+            hour='7-23',  # it will run only for daytime i.e from 7AM to 11PM
+            second=time_zone_time.second,
             minute=time_zone_time.minute,
             id="sms_job_id",
             timezone=time_zone)
@@ -57,7 +54,7 @@ def index():
 def info():
     with open('db.bin', 'rb') as f:
         timestamp = pickle.load(f)['timestamp']
-        timesince = humanize.naturaltime(time.time() - timestamp)
+        timesince = humanize.naturaltime(datetime.now() - timestamp)
     return render_template('info.html', timesince=timesince)
 
 

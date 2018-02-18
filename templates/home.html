@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Reminder</title>
+    <meta name="Description" content="Send SMS in some interval">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" />
+    <link rel="stylesheet" href="static/app.css" />
+
+</head>
+<body>
+
+<!-- The above form looks like this -->
+{% block content %}
+<div class="container">
+  <div class="alert alert-success">
+      Create Cron Alarm Message
+  </div>
+  <br>
+<form method="POST">
+ <div class="row">
+    <div class="six columns">
+      <label for="phone">Phone</label>
+      <input class="u-full-width" required name="phone" type="text" placeholder="eg. +919876543210" id="phone">
+    </div>
+      <div class="six columns">
+      <label for="message">Message</label>
+      <input class="u-full-width" name="message" type="text" placeholder="specify the message" id="message">
+    </div>
+  </div>
+
+  <input class="button-primary" type="submit" value="Submit">
+</form>
+</div>
+{% endblock %}
+
+</body>
+</html>

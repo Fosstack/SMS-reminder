@@ -1,4 +1,6 @@
 import pickle
+import requests
+import time
 from decouple import config
 from twilio.rest import Client
 
@@ -11,11 +13,18 @@ def send_message():
         db = pickle.load(f)
 
     print(db['message'])
-    message = client.messages.create(
-        to=db['phone'],
-        from_=config('TWILIO_PHONE'),
-        body=db['message'],
-        status_callback='http://d5fd4d4d.ngrok.io')
+    try:
+        client.messages.create(
+            to=db['phone'],
+            from_=config('TWILIO_PHONE'),
+            body=db['message'],
+            status_callback=config('STATUS_CALLBACK'))
+    except requests.exceptions.ConnectionError:
+        # retry to send message if there is problem connecting internet
+        print("Connection error occured!")
+        time.sleep(5)
+        print("retrying")
+        send_message()
 
 
 if __name__ == '__main__':

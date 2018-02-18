@@ -14,7 +14,6 @@ from phonenumbers import timezone as ptz
 from job import send_message
 
 app = Flask(__name__)
-app.debug = True
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -59,4 +58,4 @@ def info():
 
 
 if __name__ == "__main__":
-    app.run(use_reloader=False)
+    app.run()

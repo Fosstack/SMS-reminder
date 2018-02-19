@@ -1,24 +1,22 @@
-import humanize
 import pickle
 import requests
 import time
-from datetime import datetime
 
 from decouple import config
-from twilio.rest import Client
+
+from utils import twilio_authenticate, get_natural_timedelta
 
 
 def send_message():
-    account = config('TWILIO_ACCOUNT')
-    token = config('TWILIO_TOKEN')
-    client = Client(account, token)
+    client = twilio_authenticate()
     tried = 0
     with open('db.bin', 'rb') as f:
         db = pickle.load(f)
 
     def send():
         nonlocal tried
-        running_time = humanize.naturaldelta(datetime.now() - db['timestamp'])
+        running_time = get_natural_timedelta()
+        # the user will get the time for which the service is running
         body = f"{db['message']}\nservice running for {running_time}"
 
         try:
@@ -35,7 +33,13 @@ def send_message():
                 with open('error.log', 'a+') as f:
                     f.write(f'{ time.ctime() } { status }\
                     SMS did not send successfully\n')
+                # saving the error log in "error.log" file in root directory
                 send()
+                time.sleep(20)
+                # the instant SMS status is likely to be "queued", therefore
+                # trying 20 seconds after sending message, and doing it
+                # for maximum five times
+                status = client.messages.get(sid).fetch().status
 
         except requests.exceptions.ConnectionError:
             # retry to send message if there is problem connecting internet

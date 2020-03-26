@@ -12,7 +12,8 @@ class ReminderForm(Form):
     ])
     message = TextField('Message', [validators.Length(max=100)])
 
-    def validate_phone(self, field):
+    @staticmethod
+    def validate_phone(field):
         rule = re.compile(r'(^[+0-9]{1,3})*([0-9]{10,11}$)')
         if not rule.search(field.data):
             return False
